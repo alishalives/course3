@@ -11,5 +11,14 @@ class UserService:
     def get_one(self, uid):
         return self.dao.get_one(uid)
 
+    def get_hash(self, password):
+        return self.dao.get_hash(password)
+
+    def compare_passwords(self, hash_password, user_password):
+        return self.dao.compare_passwords(hash_password, user_password)
+
     def get_by_email(self, email):
         return self.dao.get_by_email(email)
+
+    def update_password(self, email, new_password):
+        return self.dao.update_password(email, new_password)

@@ -40,7 +40,10 @@ class AuthView(Resource):
             return {"error": "Неверные учётные данные"}, 401
 
         data = {
-            "email": user.email
+            "email": user.email,
+            "name": user.name,
+            "surname": user.surname,
+            "favorite_genre": user.favorite_genre
         }
         min30 = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         data["exp"] = calendar.timegm(min30.timetuple())

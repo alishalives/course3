@@ -1,3 +1,8 @@
+import base64
+import hashlib
+import hmac
+
+from constants import PWD_HASH_SALT, PWD_HASH_ITERATIONS
 from dao.model.user import User
 
 
@@ -15,7 +20,32 @@ class UserDAO:
         user = self.session.query(User).get(uid)
         return user
 
+    def get_hash(self, password):
+        return base64.b64encode(hashlib.pbkdf2_hmac(
+            'sha256',
+            password.encode('utf-8'),
+            PWD_HASH_SALT,
+            PWD_HASH_ITERATIONS
+        ))
+
+    def compare_passwords(self, hash_password, user_password):
+        return hmac.compare_digest(
+            base64.b64decode(hash_password),
+            hashlib.pbkdf2_hmac(
+                "sha256",
+                user_password.encode("utf-8"),
+                PWD_HASH_SALT,
+                PWD_HASH_ITERATIONS
+            )
+        )
+
     def get_by_email(self, email):
         user = self.session.query(User).filter(User.email == email).one()
         return user
-    
+
+    def update_password(self, email, new_password):
+        user = self.get_by_email(email)
+        user.password = self.get_hash(new_password)
+        self.session.add(user)
+        self.session.commit()
+        return user

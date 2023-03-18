@@ -1,5 +1,6 @@
 from dao.model.director import DirectorSchema
 from flask_restx import Namespace, Resource
+
 from implemented import director_service
 
 director_ns = Namespace("directors")
