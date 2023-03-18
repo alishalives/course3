@@ -41,7 +41,7 @@ class UserView(Resource):
         }
         return UserSchema().dump(data), 200
 
-    # @auth_required
+    @auth_required
     def patch(self, uid):
         req_json = request.json
         req_json["id"] = uid
