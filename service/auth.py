@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 
@@ -10,21 +11,23 @@ class AuthService:
         self.dao = dao
 
     def get_hash(self, password):
-        return hashlib.pbkdf2_hmac(
+        return base64.b64encode(hashlib.pbkdf2_hmac(
             'sha256',
             password.encode('utf-8'),
             PWD_HASH_SALT,
             PWD_HASH_ITERATIONS
-        ).decode("utf-8", "ignore")
+        ))
 
     def compare_passwords(self, hash_password, user_password):
-        user_password_to_hash = hashlib.pbkdf2_hmac(
-            'sha256',
-            user_password.encode('utf-8'),
-            PWD_HASH_SALT,
-            PWD_HASH_ITERATIONS
-        ).decode("utf-8", "ignore")
-        return hmac.compare_digest(hash_password, user_password_to_hash)
+        return hmac.compare_digest(
+            base64.b64decode(hash_password),
+            hashlib.pbkdf2_hmac(
+                "sha256",
+                user_password.encode("utf-8"),
+                PWD_HASH_SALT,
+                PWD_HASH_ITERATIONS
+            )
+        )
 
     def create(self, data):
         data["password"] = self.get_hash(data["password"])

@@ -10,3 +10,6 @@ class UserService:
 
     def get_one(self, uid):
         return self.dao.get_one(uid)
+
+    def get_by_email(self, email):
+        return self.dao.get_by_email(email)

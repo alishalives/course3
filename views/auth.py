@@ -1,6 +1,11 @@
-from dao.model.user import UserSchema
+import calendar
+import datetime
+
+import jwt
+
+from constants import SECRET, ALGO
 from flask_restx import Namespace, Resource
-from implemented import auth_service
+from implemented import auth_service, user_service
 from flask import request, abort
 
 auth_ns = Namespace("auth")
@@ -27,8 +32,24 @@ class AuthView(Resource):
         if None in [email, password]:
             abort(401)
 
-        return auth_service.is_check(email, password)
+        user = user_service.get_by_email(email)
 
+        if user is None:
+            return {"error": "Неверные учётные данные"}, 401
+        elif not auth_service.is_check(email, password):
+            return {"error": "Неверные учётные данные"}, 401
 
+        data = {
+            "email": user.email
+        }
+        min30 = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        data["exp"] = calendar.timegm(min30.timetuple())
+        access_token = jwt.encode(data, SECRET, algorithm=ALGO)
 
+        days130 = datetime.datetime.utcnow() + datetime.timedelta(days=130)
+        data["exp"] = calendar.timegm(days130.timetuple())
+        refresh_token = jwt.encode(data, SECRET, algorithm=ALGO)
 
+        tokens = {"access_token": access_token, "refresh_token": refresh_token}
+
+        return tokens, 201
