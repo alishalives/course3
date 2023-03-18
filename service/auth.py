@@ -34,7 +34,4 @@ class AuthService:
         return self.dao.create(data)
 
     def is_check(self, email, password):
-        if self.compare_passwords(self.dao.is_check(email), password):
-            return True
-        else:
-            return False
+        return self.compare_passwords(self.dao.is_check(email), password)
