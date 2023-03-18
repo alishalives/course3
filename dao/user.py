@@ -49,3 +49,16 @@ class UserDAO:
         self.session.add(user)
         self.session.commit()
         return user
+
+    def update_partial(self, data):
+        user = self.get_one(data["id"])
+        if "name" in data:
+            user.name = data["name"]
+
+        if "surname" in data:
+            user.surname = data["surname"]
+
+        if "favorite_genre" in data:
+            user.favorite_genre = data["favorite_genre"]
+        self.session.add(user)
+        self.session.commit()

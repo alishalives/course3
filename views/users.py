@@ -27,7 +27,7 @@ class UsersView(Resource):
         return UserSchema(many=True).dump(user_list), 200
 
 
-@user_ns.route("<int:uid>")
+@user_ns.route("/<int:uid>")
 class UserView(Resource):
     @auth_required
     def get(self, uid):
@@ -41,13 +41,15 @@ class UserView(Resource):
         }
         return UserSchema().dump(data), 200
 
-    @auth_required
+    # @auth_required
     def patch(self, uid):
         req_json = request.json
         req_json["id"] = uid
-        user_service.update_partial(req_json)
-
-        return "", 204
+        try:
+            user = user_service.update_partial(req_json)
+            return "", 204
+        except Exception as e:
+            return e
 
 
 @user_ns.route("/password")

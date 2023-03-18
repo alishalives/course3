@@ -22,3 +22,6 @@ class UserService:
 
     def update_password(self, email, new_password):
         return self.dao.update_password(email, new_password)
+
+    def update_partial(self, data):
+        return self.dao.update_partial(data)
