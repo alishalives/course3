@@ -40,10 +40,7 @@ class AuthView(Resource):
             return {"error": "Неверные учётные данные"}, 401
 
         data = {
-            "email": user.email,
-            "name": user.name,
-            "surname": user.surname,
-            "favorite_genre": user.favorite_genre
+            "email": user.email
         }
         min30 = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         data["exp"] = calendar.timegm(min30.timetuple())
@@ -56,3 +53,33 @@ class AuthView(Resource):
         tokens = {"access_token": access_token, "refresh_token": refresh_token}
 
         return tokens, 201
+
+    def put(self):
+        req_json = request.json
+        refresh_token = req_json.get("refresh_token", None)
+        if refresh_token is None:
+            abort(400)
+
+        try:
+            data_refresh = jwt.decode(jwt=refresh_token, key=SECRET, algorithms=[ALGO])
+            # data_access = jwt.decode(jwt=access_token, key=SECRET, algorithms=[ALGO])
+
+            email = data_refresh.get("email")
+            user = user_service.get_by_email(email)
+
+            data = {
+                "email": user.email
+            }
+            min30 = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+            data["exp"] = calendar.timegm(min30.timetuple())
+            access_token = jwt.encode(data, SECRET, algorithm=ALGO)
+
+            days130 = datetime.datetime.utcnow() + datetime.timedelta(days=130)
+            data["exp"] = calendar.timegm(days130.timetuple())
+            refresh_token = jwt.encode(data, SECRET, algorithm=ALGO)
+
+            tokens = {"access_token": access_token, "refresh_token": refresh_token}
+
+            return tokens, 201
+        except Exception as e:
+            abort(400)
